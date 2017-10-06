@@ -156,9 +156,11 @@ Badger.prototype = {
   * @param {String} origin the third party origin to take action on
   */
   saveAction: function(userAction, origin) {
-    var allUserActions = {'block': constants.USER_BLOCK,
-                          'cookieblock': constants.USER_COOKIE_BLOCK,
-                          'allow': constants.USER_ALLOW};
+    var allUserActions = {
+      'block': constants.USER_BLOCK,
+      'cookieblock': constants.USER_COOKIE_BLOCK,
+      'allow': constants.USER_ALLOW
+    };
     this.storage.setupUserAction(origin, allUserActions[userAction]);
     log("Finished saving action " + userAction + " for " + origin);
 
@@ -227,9 +229,9 @@ Badger.prototype = {
       }
 
       cpn.webRTCIPHandlingPolicy.set({ value: 'default_public_interface_only'},
-          function(){
-            settings.setItem("webRTCIPProtection", false);
-          });
+        function() {
+          settings.setItem("webRTCIPProtection", false);
+        });
     });
   },
 
@@ -314,9 +316,7 @@ Badger.prototype = {
       _.each(addedDomains, function(domain){
         cookieblock_list.setItem(domain, true);
         var baseDomain = window.getBaseDomain(domain);
-        if(action_map.hasItem(baseDomain) &&
-           _.contains([constants.BLOCK, constants.COOKIEBLOCK],
-                      action_map.getItem(baseDomain).heuristicAction)){
+        if(action_map.hasItem(baseDomain) && _.contains([constants.BLOCK, constants.COOKIEBLOCK], action_map.getItem(baseDomain).heuristicAction)){
           self.storage.setupHeuristicAction(domain, constants.COOKIEBLOCK);
         }
       });
@@ -358,8 +358,7 @@ Badger.prototype = {
     var self = this;
     utils.xhrRequest(constants.DNT_POLICIES_URL, function(err,response){
       if(err){
-        console.error('Problem fetching DNT policy hash list at',
-                 constants.DNT_POLICIES_URL, err.status, err.message);
+        console.error('Problem fetching DNT policy hash list at', constants.DNT_POLICIES_URL, err.status, err.message);
         return;
       }
       self.storage.updateDNTHashes(JSON.parse(response));
@@ -629,8 +628,10 @@ Badger.prototype = {
     }
 
     chrome.privacy.network.webRTCIPHandlingPolicy.get({}, function(result) {
-      self.getSettings().setItem("webRTCIPProtection",
-          (result.value === "disable_non_proxied_udp"));
+      self.getSettings().setItem(
+        "webRTCIPProtection",
+        (result.value === "disable_non_proxied_udp")
+      );
     });
     return this.getSettings().getItem("webRTCIPProtection");
   },
