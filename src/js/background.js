@@ -74,7 +74,7 @@ function Badger() {
   /**
   * WebRTC availability check
   */
-  function checkWebRTCBrowserSupport(){
+  function checkWebRTCBrowserSupport() {
     if (!(chrome.privacy && chrome.privacy.network &&
       chrome.privacy.network.webRTCIPHandlingPolicy)) {
       return false;
@@ -139,7 +139,7 @@ Badger.prototype = {
 
   // Methods
 
-  showFirstRunPage: function(){
+  showFirstRunPage: function() {
     var settings = this.storage.getBadgerStorageObject("settings_map");
     if (settings.getItem("isFirstRun") && !chrome.extension.inIncognitoContext) {
       chrome.tabs.create({
@@ -172,12 +172,12 @@ Badger.prototype = {
   /**
   * Populate tabs object with currently open tabs when extension is updated or installed.
   */
-  updateTabList: function(){
+  updateTabList: function() {
     // Initialize the tabData/frames object if it is falsey
     this.tabData = this.tabData || {};
     var self = this;
-    chrome.tabs.query({currentWindow: true, status: 'complete'}, function(tabs){
-      for(var i = 0; i < tabs.length; i++){
+    chrome.tabs.query({currentWindow: true, status: 'complete'}, function(tabs) {
+      for (var i = 0; i < tabs.length; i++) {
         var tab = tabs[i];
         self.tabData[tab.id] = {
           frames: {
@@ -199,7 +199,7 @@ Badger.prototype = {
    * * Add any new domains to the action map
    * Set a timer to update every 24 hours
    **/
-  initializeCookieBlockList: function(){
+  initializeCookieBlockList: function() {
     this.updateCookieBlockList();
     setInterval(this.updateCookieBlockList.bind(this), utils.oneDay());
   },
@@ -210,7 +210,7 @@ Badger.prototype = {
    * private setting that only shows public facing IP address.
    * Only update if user does not have the strictest setting enabled
    **/
-  enableWebRTCProtection: function(){
+  enableWebRTCProtection: function() {
     // Return early with non-supporting browsers
     if (!badger.webRTCAvailable) {
       return;
@@ -313,10 +313,10 @@ Badger.prototype = {
       });
 
       // Add any new cookie block domains whose parent domain is already blocked
-      _.each(addedDomains, function(domain){
+      _.each(addedDomains, function(domain) {
         cookieblock_list.setItem(domain, true);
         var baseDomain = window.getBaseDomain(domain);
-        if(action_map.hasItem(baseDomain) && _.contains([constants.BLOCK, constants.COOKIEBLOCK], action_map.getItem(baseDomain).heuristicAction)){
+        if (action_map.hasItem(baseDomain) && _.contains([constants.BLOCK, constants.COOKIEBLOCK], action_map.getItem(baseDomain).heuristicAction)) {
           self.storage.setupHeuristicAction(domain, constants.COOKIEBLOCK);
         }
       });
@@ -339,8 +339,8 @@ Badger.prototype = {
    */
   initializeUserAllowList: function() {
     var action_map = this.storage.getBadgerStorageObject('action_map');
-    for(var domain in action_map.getItemClones()){
-      if(this.storage.getAction(domain) === constants.USER_ALLOW){
+    for (var domain in action_map.getItemClones()) {
+      if (this.storage.getAction(domain) === constants.USER_ALLOW) {
         this.userAllow.push(domain);
       }
     }
@@ -349,15 +349,15 @@ Badger.prototype = {
   /**
   * Fetch acceptable DNT policy hashes from the EFF server
   */
-  updateDNTPolicyHashes: function(){
+  updateDNTPolicyHashes: function() {
     if (! badger.isCheckingDNTPolicyEnabled()) {
       // user has disabled this, we can check when they re-enable
       return ;
     }
 
     var self = this;
-    utils.xhrRequest(constants.DNT_POLICIES_URL, function(err,response){
-      if(err){
+    utils.xhrRequest(constants.DNT_POLICIES_URL, function(err,response) {
+      if (err) {
         console.error('Problem fetching DNT policy hash list at', constants.DNT_POLICIES_URL, err.status, err.message);
         return;
       }
@@ -423,14 +423,14 @@ Badger.prototype = {
     var url = "https://" + origin + "/.well-known/dnt-policy.txt";
     var dnt_hashes = this.storage.getBadgerStorageObject('dnt_hashes');
 
-    utils.xhrRequest(url,function(err,response){
-      if(err){
+    utils.xhrRequest(url,function(err,response) {
+      if (err) {
         callback(successStatus);
         return;
       }
       // TODO Use sha256
       utils.sha1(response, function(hash) {
-        if(dnt_hashes.hasItem(hash)){
+        if (dnt_hashes.hasItem(hash)) {
           successStatus = true;
         }
         callback(successStatus);
@@ -454,17 +454,17 @@ Badger.prototype = {
   /**
    * initialize default settings if nonexistent
    */
-  initializeDefaultSettings: function(){
+  initializeDefaultSettings: function() {
     var settings = this.storage.getBadgerStorageObject("settings_map");
-    _.each(this.defaultSettings, function(value, key){
-      if(!settings.hasItem(key)){
+    _.each(this.defaultSettings, function(value, key) {
+      if (!settings.hasItem(key)) {
         log("setting", key, ":", value);
         settings.setItem(key, value);
       }
     });
   },
 
-  runMigrations: function(){
+  runMigrations: function() {
     var badger = this;
     var settings = badger.storage.getBadgerStorageObject("settings_map");
     var migrationLevel = settings.getItem('migrationLevel');
@@ -573,18 +573,18 @@ Badger.prototype = {
    * @param {String} origin
    * @returns {Boolean} true if enabled
    **/
-  isPrivacyBadgerEnabled: function(origin){
+  isPrivacyBadgerEnabled: function(origin) {
     var settings = this.getSettings();
     var disabledSites = settings.getItem("disabledSites");
-    if(disabledSites && disabledSites.length > 0){
-      for(var i = 0; i < disabledSites.length; i++){
+    if (disabledSites && disabledSites.length > 0) {
+      for (var i = 0; i < disabledSites.length; i++) {
         var site = disabledSites[i];
-        if(site.startsWith("*")){
-          if(window.getBaseDomain(site) === window.getBaseDomain(origin)){
+        if (site.startsWith("*")) {
+          if (window.getBaseDomain(site) === window.getBaseDomain(origin)) {
             return false;
           }
         }
-        if(disabledSites[i] === origin){
+        if (disabledSites[i] === origin) {
           return false;
         }
       }
@@ -599,7 +599,7 @@ Badger.prototype = {
    * @param {String} origin
    * @returns {Boolean} true if disabled
    **/
-  isPrivacyBadgerDisabled: function(origin){
+  isPrivacyBadgerDisabled: function(origin) {
     return !this.isPrivacyBadgerEnabled(origin);
   },
 
@@ -648,10 +648,10 @@ Badger.prototype = {
    *
    * @param {String} origin The origin to disable the PB for
    **/
-  disablePrivacyBadgerForOrigin: function(origin){
+  disablePrivacyBadgerForOrigin: function(origin) {
     var settings = this.getSettings();
     var disabledSites = settings.getItem('disabledSites');
-    if(disabledSites.indexOf(origin) < 0){
+    if (disabledSites.indexOf(origin) < 0) {
       disabledSites.push(origin);
       settings.setItem("disabledSites", disabledSites);
     }
@@ -660,7 +660,7 @@ Badger.prototype = {
   /**
    * Interface to get the current whitelisted domains
    */
-  listOriginsWherePrivacyBadgerIsDisabled: function(){
+  listOriginsWherePrivacyBadgerIsDisabled: function() {
     return this.getSettings().getItem("disabledSites");
   },
 
@@ -669,11 +669,11 @@ Badger.prototype = {
    *
    * @param {String} origin The origin to disable the PB for
    **/
-  enablePrivacyBadgerForOrigin: function(origin){
+  enablePrivacyBadgerForOrigin: function(origin) {
     var settings = this.getSettings();
     var disabledSites = settings.getItem("disabledSites");
     var idx = disabledSites.indexOf(origin);
-    if(idx >= 0){
+    if (idx >= 0) {
       utils.removeElementFromArray(disabledSites, idx);
       settings.setItem("disabledSites", disabledSites);
     }
@@ -695,7 +695,7 @@ Badger.prototype = {
       lsItem = lsItems[lsKey];
       log("Checking localstorage item", lsKey, lsItem);
       estimatedEntropy += utils.estimateMaxEntropy(lsKey + lsItem);
-      if (estimatedEntropy > LOCALSTORAGE_ENTROPY_THRESHOLD){
+      if (estimatedEntropy > LOCALSTORAGE_ENTROPY_THRESHOLD) {
         log("Found hi-entropy localStorage: ", estimatedEntropy, " bits, key: ", lsKey);
         return true;
       }
@@ -781,15 +781,15 @@ Badger.prototype = {
 
 function startBackgroundListeners() {
   chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if(changeInfo.status == "loading" && tab.url) {
+    if (changeInfo.status == "loading" && tab.url) {
       badger.refreshIconAndContextMenu(tab);
       badger.updateBadge(tabId);
     }
   });
 
   // Update icon if a tab is replaced or loaded from cache
-  chrome.tabs.onReplaced.addListener(function(addedTabId/*, removedTabId*/){
-    chrome.tabs.get(addedTabId, function(tab){
+  chrome.tabs.onReplaced.addListener(function(addedTabId/*, removedTabId*/) {
+    chrome.tabs.get(addedTabId, function(tab) {
       badger.refreshIconAndContextMenu(tab);
     });
   });
@@ -801,7 +801,7 @@ function startBackgroundListeners() {
   // Listening for Avira Autopilot remote control UI
   // The Scout browser needs a "emergency off" switch in case Privacy Badger breaks a page.
   // The Privacy Badger UI will removed from the URL bar into the menu to achieve a cleaner UI in the future.
-  if(chrome.runtime.onMessageExternal){
+  if (chrome.runtime.onMessageExternal) {
     chrome.runtime.onMessageExternal.addListener(
       function(request, sender, sendResponse) {
         // This is the ID of the Avira Autopilot extension, which is the central menu for the scout browser
